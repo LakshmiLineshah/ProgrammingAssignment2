@@ -1,50 +1,75 @@
-## Caching the Inverse of a Matrix
-## functions are used to create a special object that stores a matrix and caches its inverse.
-
-## Below function creates a special "matrix" object that can cache its inverse.
 makeCacheMatrix <- function(x = matrix()) {
-
-
-     inv <- NULL
-        set <- function(y) {
+        cache <- NULL
+# creating the matrix 
+        
+        set <- function(y) {      
                 x <<- y
-                inv <<- NULL
+                cache <<- NULL
         }
+
+        # get the value of the matrix
         get <- function() x
-        setInverse <- function(inverse) inv <<- inverse
-        getInverse <- function() inv
-        list(set = set,
-             get = get,
-             setInverse = setInverse,
+        # invert the matrix and store in cache
+        setMatrix <- function(inverse) cache <<- inverse
+        # get the inverted matrix from cache
+        getInverse <- function() cache
+
+        # return the created functions to the working environment
+        list(set = set, get = get,
+             setMatrix = setMatrix,
              getInverse = getInverse)
 }
 
-
-
-## Below function computes the inverse of the special "matrix" created by makeCacheMatrix above.
-## If the inverse has already been calculated (and the  matrix has not changed), then it should retrieve the inverse from the cache.
-
 cacheSolve <- function(x, ...) {
-    
-    ## Return a matrix that is the inverse of 'x'
-        inv <- x$getInverse()
-        if (!is.null(inv)) {
+        ## get the inverse of the matrix stored in cache
+        cache <- x$getInverse()
+
+        ## return inverted matrix from cache if it exists else create the matrix in working environment
+        
+        if (!is.null(cache)) {
                 message("getting cached data")
-                return(inv)
+                return(cache)
         }
-        mat <- x$get()
-        inv <- solve(mat, ...)
-        x$setInverse(inv)
-        inv
-    ## Return a matrix that is the inverse of 'x'
+
+        # create matrix since it does not exist
+        matrix <- x$get()
+
+       
+        tryCatch( {
+                # set and return inverse of matrix
+                cache <- solve(matrix, ...)
+        },
+        error = function(e) {
+                message("Error")
+                message(e)
+
+                return(NA)
+        },
+        warning = function(e) {
+                message("Warning")
+                message(e)
+
+                return(NA)
+        },
+        finally = {
+                x$setMatrix(cache)
+        } )
+
+        return (cache)
 }
-             
-             
- ## Results can be checked by the following :
- my_matrix <- makeCacheMatrix(matrix(1:4, 2, 2))
- my_matrix$get()
- my_matrix$getInverse()
- cacheSolve(my_matrix)
- ## To get the cached data 
- cacheSolve(my_matrix)
- my_matrix$getInverse()
+
+##  source("cachematrix.R")    load R program
+##  x<- makeCacheMatrix()     create functions
+##  x$set(matrix(1:4, 2, 2))   create matrix in working environment
+##  cacheSolve(x)              1st run returns inverted matrix
+##                              from working environment
+## [,1] [,2]
+## [1,]   -2  1.5
+## [2,]    1 -0.5
+##
+##  cacheSolve(x)              2nd and subsequent runs
+##                              returns inverted matrix from cache
+## getting cached data          
+## [,1] [,2]
+## [1,]   -2  1.5
+## [2,]    1 -0.5
