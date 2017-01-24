@@ -58,6 +58,9 @@ cacheSolve <- function(x, ...) {
         return (cache)
 }
 
+
+## To check the result
+
 ##  source("cachematrix.R")    load R program
 ##  x<- makeCacheMatrix()     create functions
 ##  x$set(matrix(1:4, 2, 2))   create matrix in working environment
